@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Faturas Profissional</title>
+    <style>
+        /* ================= ESTILOS GERAIS (TELA) ================= */
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-color: #f4f7f6;
+            --paper-color: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+            flex-wrap: wrap; /* Para telas pequenas */
+        }
+
+        /* Área de Controle (Formulário) */
+        .control-panel {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            min-width: 300px;
+            height: fit-content;
+        }
+
+        .control-panel h2 {
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .form-group input, 
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box; /* Garante que padding não aumente a largura */
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #1a252f;
+        }
+
+        button.btn-print {
+            background-color: var(--accent-color);
+            margin-top: 20px;
+        }
+
+        button.btn-print:hover {
+            background-color: #2980b9;
+        }
+
+        /* Área da Fatura (Papel A4) */
+        .invoice-preview {
+            flex: 1.5;
+            background: var(--paper-color);
+            padding: 40px;
+            min-height: 800px; /* Altura visual aproximada */
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        /* Estilos Internos da Fatura */
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .company-name {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .invoice-meta {
+            text-align: right;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+        }
+
+        .client-details, .service-details {
+            margin-bottom: 30px;
+        }
+
+        .service-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .service-table th {
+            text-align: left;
+            background-color: #eee;
+            padding: 10px;
+        }
+
+        .service-table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .total-section {
+            text-align: right;
+            margin-top: 30px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #777;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        /* ================= ESTILOS DE IMPRESSÃO (CSS @media print) ================= */
+        @media print {
+            /* Esconde elementos de interface */
+            .control-panel, .btn-print, body {
+                background: none;
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+            }
+
+            /* Esconde tudo que não for a fatura */
+            body > *:not(.container) {
+                display: none;
+            }
+
+            .container {
+                display: block; /* Remove o flexbox para impressão */
+                width: 100%;
+                max-width: none;
+            }
+
+            .control-panel {
+                display: none; /* Esconde o formulário */
+            }
+
+            .invoice-preview {
+                width: 100%;
+                margin: 0;
+                padding: 20px; /* Margem segura para impressoras */
+                box-shadow: none;
+                border: none;
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+
+            /* Configurações da página */
+            @page {
+                size: A4;
+                margin: 0; /* Remove margens do navegador */
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="control-panel">
+        <h2>🛠️ Criar Fatura</h2>
+        
+        <div class="form-group">
+            <label>Número da Fatura:</label>
+            <input type="text" id="inputInvoiceNum" value="INV-001">
+        </div>
+        
+        <div class="form-group">
+            <label>Data:</label>
+            <input type="date" id="inputDate">
+        </div>
+
+        <hr>
+
+        <div class="form-group">
+            <label>Nome do Cliente:</label>
+            <input type="text" id="inputClientName" placeholder="Ex: João Silva">
+        </div>
+        
+        <div class="form-group">
+            <label>Email do Cliente:</label>
+            <input type="email" id="inputClientEmail" placeholder="joao@email.com">
+        </div>
+
+        <hr>
+
+        <div class="form-group">
+            <label>Nome do Serviço:</label>
+            <input type="text" id="inputServiceName" placeholder="Ex: Desenvolvimento Web">
+        </div>
+
+        <div class="form-group">
+            <label>Descrição:</label>
+            <textarea id="inputServiceDesc" rows="3" placeholder="Detalhes do serviço..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Valor (R$):</label>
+            <input type="number" id="inputAmount" step="0.01" placeholder="0.00">
+        </div>
+
+        <button onclick="gerarFatura()">🔄 Atualizar/Gerar Fatura</button>
+        <button class="btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+    </div>
+
+    <div class="invoice-preview" id="invoice">
+        <header class="invoice-header">
+            <div class="company-info">
+                <div class="company-name">MINHA EMPRESA LTDA</div>
+                <div>CNPJ: 00.000.000/0001-00</div>
+                <div>contato@minhaempresa.com</div>
+            </div>
+            <div class="invoice-meta">
+                <h2>FATURA</h2>
+                <div>Nº: <strong id="displayInvoiceNum">---</strong></div>
+                <div>Data: <span id="displayDate">--/--/----</span></div>
+            </div>
+        </header>
+
+        <section class="client-details">
+            <div class="section-title">Faturado para:</div>
+            <div id="displayClientName"><strong>Nome do Cliente</strong></div>
+            <div id="displayClientEmail">email@cliente.com</div>
+        </section>
+
+        <section class="service-details">
+            <div class="section-title">Serviços</div>
+            <table class="service-table">
+                <thead>
+                    <tr>
+                        <th>Descrição</th>
+                        <th style="text-align: right; width: 150px;">Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <strong id="displayServiceName">Nome do Serviço</strong><br>
+                            <small id="displayServiceDesc" style="color: #666;">Descrição detalhada aqui...</small>
+                        </td>
+                        <td style="text-align: right;" id="displayAmount">R$ 0,00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <div class="total-section">
+            Total: <span id="displayTotal">R$ 0,00</span>
+        </div>
+
+        <footer class="footer">
+            <p>Obrigado pela preferência!</p>
+            <p>Dúvidas? Entre em contato conosco.</p>
+        </footer>
+    </div>
+</div>
+
+<script>
+    // Define a data de hoje como padrão ao carregar
+    document.getElementById('inputDate').valueAsDate = new Date();
+
+    function gerarFatura() {
+        // 1. Capturar os valores do formulário (DOM - Get)
+        const invoiceNum = document.getElementById('inputInvoiceNum').value;
+        const dateInput = document.getElementById('inputDate').value;
+        const clientName = document.getElementById('inputClientName').value;
+        const clientEmail = document.getElementById('inputClientEmail').value;
+        const serviceName = document.getElementById('inputServiceName').value;
+        const serviceDesc = document.getElementById('inputServiceDesc').value;
+        const amount = parseFloat(document.getElementById('inputAmount').value) || 0;
+
+        // 2. Formatar dados (Lógica)
+        // Formatar data para PT-BR
+        let formattedDate = "--/--/----";
+        if (dateInput) {
+            const dateObj = new Date(dateInput);
+            // Ajuste de fuso horário simples
+            dateObj.setMinutes(dateObj.getMinutes() + dateObj.getTimezoneOffset());
+            formattedDate = dateObj.toLocaleDateString('pt-BR');
+        }
+
+        // Formatar moeda para Real Brasileiro
+        const formattedAmount = amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        // 3. Atualizar a Fatura (DOM - Set)
+        document.getElementById('displayInvoiceNum').innerText = invoiceNum || '---';
+        document.getElementById('displayDate').innerText = formattedDate;
+        
+        document.getElementById('displayClientName').innerHTML = clientName ? `<strong>${clientName}</strong>` : 'Nome do Cliente';
+        document.getElementById('displayClientEmail').innerText = clientEmail || 'email@cliente.com';
+        
+        document.getElementById('displayServiceName').innerText = serviceName || 'Serviço';
+        document.getElementById('displayServiceDesc').innerText = serviceDesc || 'Descrição...';
+        
+        document.getElementById('displayAmount').innerText = formattedAmount;
+        document.getElementById('displayTotal').innerText = formattedAmount;
+    }
+
+    // Gerar fatura inicial para não ficar vazio
+    gerarFatura();
+</script>
+
+</body>
+</html>
+
