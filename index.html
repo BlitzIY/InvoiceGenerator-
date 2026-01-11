@@ -26,9 +26,10 @@
         .container {
             display: flex;
             gap: 20px;
-            max-width: 1200px;
+            max-width: 1200px; /* Largura máxima da tela */
             width: 100%;
-            flex-wrap: wrap; /* Para telas pequenas */
+            flex-wrap: wrap; 
+            align-items: flex-start; /* Alinha o topo dos elementos */
         }
 
         /* Área de Controle (Formulário) */
@@ -39,7 +40,8 @@
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             min-width: 300px;
-            height: fit-content;
+            position: sticky; /* Mantém o menu visível ao rolar */
+            top: 20px; 
         }
 
         .control-panel h2 {
@@ -64,7 +66,15 @@
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            box-sizing: border-box; /* Garante que padding não aumente a largura */
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        /* Melhoria: Feedback visual ao digitar */
+        .form-group input:focus, 
+        .form-group textarea:focus {
+            border-color: var(--accent-color);
+            outline: none;
         }
 
         button {
@@ -77,7 +87,11 @@
             cursor: pointer;
             font-size: 1rem;
             margin-top: 10px;
-            transition: background 0.3s;
+            transition: background 0.3s, transform 0.1s;
+        }
+
+        button:active {
+            transform: scale(0.98); /* Efeito de clique */
         }
 
         button:hover {
@@ -93,12 +107,20 @@
             background-color: #2980b9;
         }
 
-        /* Área da Fatura (Papel A4) */
-        .invoice-preview {
+        /* Área da Fatura (Papel A4 Realista) */
+        .invoice-wrapper {
             flex: 1.5;
+            display: flex;
+            justify-content: center; /* Centraliza o papel na área cinza */
+        }
+
+        .invoice-preview {
             background: var(--paper-color);
-            padding: 40px;
-            min-height: 800px; /* Altura visual aproximada */
+            /* Melhoria: Medidas exatas do A4 */
+            width: 210mm; 
+            min-height: 297mm;
+            padding: 20mm; /* Margem interna padrão A4 */
+            box-sizing: border-box;
             box-shadow: 0 0 15px rgba(0,0,0,0.1);
             position: relative;
         }
@@ -144,6 +166,9 @@
             text-align: left;
             background-color: #eee;
             padding: 10px;
+            /* Melhoria: Garante que o cinza saia na impressão */
+            -webkit-print-color-adjust: exact; 
+            print-color-adjust: exact;
         }
 
         .service-table td {
@@ -170,44 +195,46 @@
 
         /* ================= ESTILOS DE IMPRESSÃO (CSS @media print) ================= */
         @media print {
-            /* Esconde elementos de interface */
-            .control-panel, .btn-print, body {
+            body {
                 background: none;
+                -webkit-print-color-adjust: exact; /* Força impressão de cores exatas */
+                print-color-adjust: exact;
+            }
+
+            .control-panel, .btn-print, .container {
+                display: block;
+                width: 100%;
                 margin: 0;
                 padding: 0;
-                box-shadow: none;
+            }
+            
+            /* Esconde a interface de controle */
+            .control-panel {
+                display: none !important;
             }
 
-            /* Esconde tudo que não for a fatura */
-            body > *:not(.container) {
-                display: none;
-            }
-
+            /* Garante que o container não restrinja o tamanho */
             .container {
-                display: block; /* Remove o flexbox para impressão */
-                width: 100%;
                 max-width: none;
             }
 
-            .control-panel {
-                display: none; /* Esconde o formulário */
+            .invoice-wrapper {
+                display: block;
+                margin: 0;
             }
 
             .invoice-preview {
                 width: 100%;
+                min-height: auto; /* Deixa a altura automática na impressão */
                 margin: 0;
-                padding: 20px; /* Margem segura para impressoras */
+                padding: 0; /* Remove padding extra pois a impressora já tem margem */
                 box-shadow: none;
                 border: none;
-                position: absolute;
-                top: 0;
-                left: 0;
             }
 
-            /* Configurações da página */
             @page {
                 size: A4;
-                margin: 0; /* Remove margens do navegador */
+                margin: 1.5cm; /* Define margem da impressora */
             }
         }
     </style>
@@ -218,107 +245,122 @@
     <div class="control-panel">
         <h2>🛠️ Criar Fatura</h2>
         
-        <div class="form-group">
-            <label>Número da Fatura:</label>
-            <input type="text" id="inputInvoiceNum" value="INV-001">
-        </div>
-        
-        <div class="form-group">
-            <label>Data:</label>
-            <input type="date" id="inputDate">
-        </div>
+        <form id="invoiceForm" onsubmit="event.preventDefault(); gerarFatura();">
+            <div class="form-group">
+                <label>Número da Fatura:</label>
+                <input type="text" id="inputInvoiceNum" value="INV-001">
+            </div>
+            
+            <div class="form-group">
+                <label>Data:</label>
+                <input type="date" id="inputDate">
+            </div>
 
-        <hr>
+            <hr>
 
-        <div class="form-group">
-            <label>Nome do Cliente:</label>
-            <input type="text" id="inputClientName" placeholder="Ex: João Silva">
-        </div>
-        
-        <div class="form-group">
-            <label>Email do Cliente:</label>
-            <input type="email" id="inputClientEmail" placeholder="joao@email.com">
-        </div>
+            <div class="form-group">
+                <label>Nome do Cliente:</label>
+                <input type="text" id="inputClientName" placeholder="Ex: João Silva">
+            </div>
+            
+            <div class="form-group">
+                <label>Email do Cliente:</label>
+                <input type="email" id="inputClientEmail" placeholder="joao@email.com">
+            </div>
 
-        <hr>
+            <hr>
 
-        <div class="form-group">
-            <label>Nome do Serviço:</label>
-            <input type="text" id="inputServiceName" placeholder="Ex: Desenvolvimento Web">
-        </div>
+            <div class="form-group">
+                <label>Nome do Serviço:</label>
+                <input type="text" id="inputServiceName" placeholder="Ex: Desenvolvimento Web">
+            </div>
 
-        <div class="form-group">
-            <label>Descrição:</label>
-            <textarea id="inputServiceDesc" rows="3" placeholder="Detalhes do serviço..."></textarea>
-        </div>
+            <div class="form-group">
+                <label>Descrição:</label>
+                <textarea id="inputServiceDesc" rows="3" placeholder="Detalhes do serviço..."></textarea>
+            </div>
 
-        <div class="form-group">
-            <label>Valor (R$):</label>
-            <input type="number" id="inputAmount" step="0.01" placeholder="0.00">
-        </div>
+            <div class="form-group">
+                <label>Valor (R$):</label>
+                <input type="number" id="inputAmount" step="0.01" placeholder="0.00">
+            </div>
 
-        <button onclick="gerarFatura()">🔄 Atualizar/Gerar Fatura</button>
-        <button class="btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+            <button type="button" onclick="gerarFatura()">🔄 Atualizar/Gerar Fatura</button>
+            <button type="button" class="btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+        </form>
     </div>
 
-    <div class="invoice-preview" id="invoice">
-        <header class="invoice-header">
-            <div class="company-info">
-                <div class="company-name">MINHA EMPRESA LTDA</div>
-                <div>CNPJ: 00.000.000/0001-00</div>
-                <div>contato@minhaempresa.com</div>
+    <div class="invoice-wrapper">
+        <div class="invoice-preview" id="invoice">
+            <header class="invoice-header">
+                <div class="company-info">
+                    <div class="company-name">MINHA EMPRESA LTDA</div>
+                    <div>CNPJ: 00.000.000/0001-00</div>
+                    <div>contato@minhaempresa.com</div>
+                </div>
+                <div class="invoice-meta">
+                    <h2>FATURA</h2>
+                    <div>Nº: <strong id="displayInvoiceNum">---</strong></div>
+                    <div>Data: <span id="displayDate">--/--/----</span></div>
+                </div>
+            </header>
+
+            <section class="client-details">
+                <div class="section-title">Faturado para:</div>
+                <div id="displayClientName"><strong>Nome do Cliente</strong></div>
+                <div id="displayClientEmail">email@cliente.com</div>
+            </section>
+
+            <section class="service-details">
+                <div class="section-title">Serviços</div>
+                <table class="service-table">
+                    <thead>
+                        <tr>
+                            <th>Descrição</th>
+                            <th style="text-align: right; width: 150px;">Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <strong id="displayServiceName">Nome do Serviço</strong><br>
+                                <small id="displayServiceDesc" style="color: #666;">Descrição detalhada aqui...</small>
+                            </td>
+                            <td style="text-align: right;" id="displayAmount">R$ 0,00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <div class="total-section">
+                Total: <span id="displayTotal">R$ 0,00</span>
             </div>
-            <div class="invoice-meta">
-                <h2>FATURA</h2>
-                <div>Nº: <strong id="displayInvoiceNum">---</strong></div>
-                <div>Data: <span id="displayDate">--/--/----</span></div>
-            </div>
-        </header>
 
-        <section class="client-details">
-            <div class="section-title">Faturado para:</div>
-            <div id="displayClientName"><strong>Nome do Cliente</strong></div>
-            <div id="displayClientEmail">email@cliente.com</div>
-        </section>
-
-        <section class="service-details">
-            <div class="section-title">Serviços</div>
-            <table class="service-table">
-                <thead>
-                    <tr>
-                        <th>Descrição</th>
-                        <th style="text-align: right; width: 150px;">Valor</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>
-                            <strong id="displayServiceName">Nome do Serviço</strong><br>
-                            <small id="displayServiceDesc" style="color: #666;">Descrição detalhada aqui...</small>
-                        </td>
-                        <td style="text-align: right;" id="displayAmount">R$ 0,00</td>
-                    </tr>
-                </tbody>
-            </table>
-        </section>
-
-        <div class="total-section">
-            Total: <span id="displayTotal">R$ 0,00</span>
+            <footer class="footer">
+                <p>Obrigado pela preferência!</p>
+                <p>Dúvidas? Entre em contato conosco.</p>
+            </footer>
         </div>
-
-        <footer class="footer">
-            <p>Obrigado pela preferência!</p>
-            <p>Dúvidas? Entre em contato conosco.</p>
-        </footer>
     </div>
 </div>
 
 <script>
-    // Define a data de hoje como padrão ao carregar
-    document.getElementById('inputDate').valueAsDate = new Date();
+    // Configura a data inicial e inicia os eventos
+    window.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('inputDate').valueAsDate = new Date();
+        
+        // Melhoria: Adiciona "ouvintes" em todos os campos para atualização em tempo real
+        const inputs = document.querySelectorAll('input, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('input', gerarFatura);
+        });
+
+        // Gera a primeira versão
+        gerarFatura();
+    });
 
     function gerarFatura() {
-        // 1. Capturar os valores do formulário (DOM - Get)
+        // 1. Capturar os valores (DOM)
         const invoiceNum = document.getElementById('inputInvoiceNum').value;
         const dateInput = document.getElementById('inputDate').value;
         const clientName = document.getElementById('inputClientName').value;
@@ -327,35 +369,30 @@
         const serviceDesc = document.getElementById('inputServiceDesc').value;
         const amount = parseFloat(document.getElementById('inputAmount').value) || 0;
 
-        // 2. Formatar dados (Lógica)
-        // Formatar data para PT-BR
+        // 2. Lógica de Formatação
         let formattedDate = "--/--/----";
         if (dateInput) {
             const dateObj = new Date(dateInput);
-            // Ajuste de fuso horário simples
             dateObj.setMinutes(dateObj.getMinutes() + dateObj.getTimezoneOffset());
             formattedDate = dateObj.toLocaleDateString('pt-BR');
         }
 
-        // Formatar moeda para Real Brasileiro
         const formattedAmount = amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-        // 3. Atualizar a Fatura (DOM - Set)
+        // 3. Atualizar a Interface
         document.getElementById('displayInvoiceNum').innerText = invoiceNum || '---';
         document.getElementById('displayDate').innerText = formattedDate;
         
+        // Usamos lógica ternária para manter um texto padrão caso esteja vazio
         document.getElementById('displayClientName').innerHTML = clientName ? `<strong>${clientName}</strong>` : 'Nome do Cliente';
         document.getElementById('displayClientEmail').innerText = clientEmail || 'email@cliente.com';
         
-        document.getElementById('displayServiceName').innerText = serviceName || 'Serviço';
-        document.getElementById('displayServiceDesc').innerText = serviceDesc || 'Descrição...';
+        document.getElementById('displayServiceName').innerText = serviceName || 'Nome do Serviço';
+        document.getElementById('displayServiceDesc').innerText = serviceDesc || 'Descrição detalhada aqui...';
         
         document.getElementById('displayAmount').innerText = formattedAmount;
         document.getElementById('displayTotal').innerText = formattedAmount;
     }
-
-    // Gerar fatura inicial para não ficar vazio
-    gerarFatura();
 </script>
 
 </body>
