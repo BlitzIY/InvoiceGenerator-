@@ -38,7 +38,7 @@ O diferencial é o uso inteligente de **CSS Media Queries**, permitindo que a te
 
 Não é necessário instalar Node.js, Python ou servidores. É **Puro HTML/JS**.
 
-1.  Baixe o arquivo `index.html`.
+1.  Baixe o arquivo `fatura.html`.
 2.  Dê um duplo clique para abrir em seu navegador favorito (Chrome, Edge, Firefox, Brave).
 3.  Preencha os campos no menu lateral esquerdo.
 4.  Clique no botão **"🖨️ Imprimir / Salvar PDF"**.
@@ -52,6 +52,34 @@ Não é necessário instalar Node.js, Python ou servidores. É **Puro HTML/JS**.
 
 O projeto segue o conceito de **Single File Component** para fins didáticos:
 
-```text
+```
 /
-└── index.html  <-- Toda a mágica acontece aqui (HTML + CSS + JS)
+└── fatura.html  <-- Toda a mágica acontece aqui (HTML + CSS + JS)'
+```
+
+# Detalhes Técnicos
+ * HTML Semântico: Uso de tags apropriadas (header, section, footer) para melhor acessibilidade.
+ * CSS Variables: Cores definidas em :root para fácil customização de tema.
+ * CSS Flexbox: Utilizado para o layout responsivo da interface de edição.
+ * @media print: A "alma" do projeto. Define regras que ocultam o formulário e formatam a fatura apenas quando o comando de impressão é acionado.
+ * Vanilla JavaScript: Lógica leve sem dependências (sem jQuery, React ou Vue) para máxima performance.
+🎨 Personalização
+Quer colocar a cor da sua empresa? Abra o arquivo fatura.html em um editor de texto e procure por:
+:root {
+    --primary-color: #2c3e50; /* Mude aqui a cor principal */
+    --accent-color: #3498db;  /* Mude a cor de destaque */
+}
+
+Para alterar o logo/nome da empresa, edite a linha 158 no HTML:
+<div class="company-name">SUA EMPRESA AQUI</div>
+
+🤝 Contribuição
+Sinta-se livre para clonar e melhorar este projeto! Ideias para evoluir:
+ * [ ] Adicionar suporte a múltiplos itens na tabela.
+ * [ ] Cálculo automático de impostos (ISS/ICMS).
+ * [ ] Upload de Logotipo (imagem).
+ * [ ] Opção para salvar histórico no localStorage.
+<div align="center">
+Feito com 💙.
+</div>
+
