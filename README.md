@@ -38,7 +38,7 @@ O diferencial é o uso inteligente de **CSS Media Queries**, permitindo que a te
 
 Não é necessário instalar Node.js, Python ou servidores. É **Puro HTML/JS**.
 
-1.  Baixe o arquivo `fatura.html`.
+1.  Baixe o arquivo `index.html`.
 2.  Dê um duplo clique para abrir em seu navegador favorito (Chrome, Edge, Firefox, Brave).
 3.  Preencha os campos no menu lateral esquerdo.
 4.  Clique no botão **"🖨️ Imprimir / Salvar PDF"**.
@@ -52,12 +52,11 @@ Não é necessário instalar Node.js, Python ou servidores. É **Puro HTML/JS**.
 
 O projeto segue o conceito de **Single File Component** para fins didáticos:
 
-```
+```text
 /
-└── fatura.html  <-- Toda a mágica acontece aqui (HTML + CSS + JS)'
+└── index.html  <-- Toda a mágica acontece aqui (HTML + CSS + JS)
 ```
-
-# Detalhes Técnicos
+Detalhes Técnicos
  * HTML Semântico: Uso de tags apropriadas (header, section, footer) para melhor acessibilidade.
  * CSS Variables: Cores definidas em :root para fácil customização de tema.
  * CSS Flexbox: Utilizado para o layout responsivo da interface de edição.
@@ -70,7 +69,7 @@ Quer colocar a cor da sua empresa? Abra o arquivo fatura.html em um editor de te
     --accent-color: #3498db;  /* Mude a cor de destaque */
 }
 
-Para alterar o logo/nome da empresa, edite a linha 158 no HTML:
+Para alterar o logo/nome da empresa, edite a linha 297 no HTML:
 <div class="company-name">SUA EMPRESA AQUI</div>
 
 🤝 Contribuição
@@ -82,4 +81,3 @@ Sinta-se livre para clonar e melhorar este projeto! Ideias para evoluir:
 <div align="center">
 Feito com 💙.
 </div>
-
