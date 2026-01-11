@@ -54,4 +54,4 @@ O projeto segue o conceito de **Single File Component** para fins didáticos:
 
 ```text
 /
-└── fatura.html  <-- Toda a mágica acontece aqui (HTML + CSS + JS)
+└── index.html  <-- Toda a mágica acontece aqui (HTML + CSS + JS)
