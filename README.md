@@ -36,13 +36,10 @@ O diferencial é o uso inteligente de **CSS Media Queries**, permitindo que a te
 
 ## 🚀 Como Usar
 
-Não é necessário instalar Node.js, Python ou servidores. É **Puro HTML/JS**.
 
-1.  Baixe o arquivo `fatura.html`.
-2.  Dê um duplo clique para abrir em seu navegador favorito (Chrome, Edge, Firefox, Brave).
-3.  Preencha os campos no menu lateral esquerdo.
-4.  Clique no botão **"🖨️ Imprimir / Salvar PDF"**.
-5.  Na janela de impressão, selecione **"Salvar como PDF"** ou escolha sua impressora.
+1.  Preencha os campos no menu lateral esquerdo.
+2.  Clique no botão **"🖨️ Imprimir / Salvar PDF"**.
+3.  Na janela de impressão, selecione **"Salvar como PDF"** ou escolha sua impressora.
 
 > **Dica:** Certifique-se de marcar a opção "Gráficos de plano de fundo" nas configurações de impressão do navegador para que as cores (cabeçalho, tabelas) saiam corretamente.
 
